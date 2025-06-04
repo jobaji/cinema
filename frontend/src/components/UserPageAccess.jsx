@@ -13,6 +13,7 @@ const UserPageAccess = () => {
         e.preventDefault();
         if (!userId) return;
 
+        
         setLoading(true);
         try {
             const userResponse = await axios.get(`http://localhost:5000/api/users/${userId}`);
