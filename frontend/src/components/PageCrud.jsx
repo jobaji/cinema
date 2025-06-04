@@ -9,7 +9,7 @@ const PageCRUD = () => {
     const [currentPageId, setCurrentPageId] = useState(null);
     const [pageDescription, setPageDescription] = useState('');
     const [pageGroup, setPageGroup] = useState('');
-    const [hasAccess, setHasAccess] = useState(null); // State for access control
+    const [hasAccess, setHasAccess] = useState(false);    
     const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {

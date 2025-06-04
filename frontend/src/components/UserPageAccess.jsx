@@ -7,40 +7,7 @@ const UserPageAccess = () => {
     const [userFound, setUserFound] = useState(null);
     const [pages, setPages] = useState([]);
     const [pageAccess, setPageAccess] = useState({});
-    const [hasAccess, setHasAccess] = useState(null); // State for access contro
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        // Retrieve userId from localStorage (make sure this exists and is correct)
-        const userId = localStorage.getItem('userId');
-        const pageId = 2; // The page ID for the Profile
-        fetchPages(); // Refresh the list upon loading
-        // If userId is missing, deny access early
-        if (!userId) {
-            setHasAccess(false);
-            return;
-        }
-
-        // Function to check if the user has access
-        const checkAccess = async () => {
-            try {
-                const response = await axios.get(`http://localhost:5000/api/page_access/${userId}/${pageId}`);
-                
-                // Check if the API response contains the 'hasAccess' field
-                if (response.data && typeof response.data.hasAccess === 'boolean') {
-                    setHasAccess(response.data.hasAccess);
-                } else {
-                    console.error('Unexpected API response format:', response.data);
-                    setHasAccess(false);
-                }
-            } catch (error) {
-                console.error('Error checking access:', error);
-                setHasAccess(false); // No access if there's an error
-            }
-        };
-
-        checkAccess();
-    }, []);
 
     const handleSearchUser = async (e) => {
         e.preventDefault();
@@ -128,18 +95,6 @@ const UserPageAccess = () => {
         }
     };
 
-    // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- START
-
-    // If hasAccess is still null, show a loading state
-    if (hasAccess === null) {
-        return <div>Loading access information...</div>;
-    }
-  
-    // Deny access if hasAccess is false
-    if (!hasAccess) {
-        return <div>You do not have access to this page. You need to ask permission to the administration.</div>;
-    }
-  // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- END
     return (
         <Box p={4}>
             <Typography variant="h4" gutterBottom>User Page Access Management</Typography>
