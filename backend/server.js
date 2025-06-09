@@ -174,7 +174,213 @@ app.put('/api/page_access/:userId/:pageId', checkAdmin, (req, res) => {
 });
 
 // PAGE ACCESS  CRUD END -----------------------------------------------------------------------
+// ---------- MOVIES ----------
+app.get('/api/movies', (_, res) => {
+  db.query('SELECT * FROM movie', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/movies', (req, res) => {
+  db.query('INSERT INTO movie SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/movies/:id', (req, res) => {
+  db.query('UPDATE movie SET ? WHERE MovieID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Movie updated' });
+  });
+});
+app.delete('/api/movies/:id', (req, res) => {
+  db.query('DELETE FROM movie WHERE MovieID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
 
+// ---------- BOOKINGS ----------
+app.get('/api/bookings', (_, res) => {
+  db.query('SELECT * FROM booking', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/bookings', (req, res) => {
+  db.query('INSERT INTO booking SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/bookings/:id', (req, res) => {
+  db.query('UPDATE booking SET ? WHERE BookingID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Booking updated' });
+  });
+});
+app.delete('/api/bookings/:id', (req, res) => {
+  db.query('DELETE FROM booking WHERE BookingID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
+
+// ---------- CUSTOMERS ----------
+app.get('/api/customers', (_, res) => {
+  db.query('SELECT * FROM customer', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/customers', (req, res) => {
+  db.query('INSERT INTO customer SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/customers/:id', (req, res) => {
+  db.query('UPDATE customer SET ? WHERE CustomerID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Customer updated' });
+  });
+});
+app.delete('/api/customers/:id', (req, res) => {
+  db.query('DELETE FROM customer WHERE CustomerID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
+
+// ---------- MEMBERSHIPS ----------
+app.get('/api/memberships', (_, res) => {
+  db.query('SELECT * FROM memberships', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/memberships', (req, res) => {
+  db.query('INSERT INTO memberships SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/memberships/:id', (req, res) => {
+  db.query('UPDATE memberships SET ? WHERE MembershipID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Membership updated' });
+  });
+});
+app.delete('/api/memberships/:id', (req, res) => {
+  db.query('DELETE FROM memberships WHERE MembershipID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
+
+// ---------- SHOWTIMES ----------
+app.get('/api/showtimes', (_, res) => {
+  db.query('SELECT * FROM showtime', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/showtimes', (req, res) => {
+  db.query('INSERT INTO showtime SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/showtimes/:id', (req, res) => {
+  db.query('UPDATE showtime SET ? WHERE ShowtimeID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Showtime updated' });
+  });
+});
+app.delete('/api/showtimes/:id', (req, res) => {
+  db.query('DELETE FROM showtime WHERE ShowtimeID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
+
+// ---------- PAYMENTS ----------
+app.get('/api/payments', (_, res) => {
+  db.query('SELECT * FROM payment', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/payments', (req, res) => {
+  db.query('INSERT INTO payment SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/payments/:id', (req, res) => {
+  db.query('UPDATE payment SET ? WHERE PaymentID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Payment updated' });
+  });
+});
+app.delete('/api/payments/:id', (req, res) => {
+  db.query('DELETE FROM payment WHERE PaymentID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
+
+// ---------- USERS ----------
+app.get('/api/users', (_, res) => {
+  db.query('SELECT id, username, email, role FROM users', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/users', (req, res) => {
+  db.query('INSERT INTO users SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/users/:id', (req, res) => {
+  db.query('UPDATE users SET ? WHERE id = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'User updated' });
+  });
+});
+app.delete('/api/users/:id', (req, res) => {
+  db.query('DELETE FROM users WHERE id = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
+
+// ---------- SEATS ----------
+app.get('/api/seats', (_, res) => {
+  db.query('SELECT * FROM seat', (err, results) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(results);
+  });
+});
+app.post('/api/seats', (req, res) => {
+  db.query('INSERT INTO seat SET ?', req.body, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert error' });
+    res.status(201).json({ id: result.insertId });
+  });
+});
+app.put('/api/seats/:id', (req, res) => {
+  db.query('UPDATE seat SET ? WHERE SeatID = ?', [req.body, req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Update error' });
+    res.json({ message: 'Seat updated' });
+  });
+});
+app.delete('/api/seats/:id', (req, res) => {
+  db.query('DELETE FROM seat WHERE SeatID = ?', [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Delete error' });
+    res.sendStatus(204);
+  });
+});
 
 app.listen(5000, () => {
   console.log('Server running on port 5000');

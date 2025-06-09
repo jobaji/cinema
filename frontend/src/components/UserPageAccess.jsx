@@ -9,24 +9,18 @@ const UserPageAccess = () => {
     const [pageAccess, setPageAccess] = useState({});
     const [hasAccess, setHasAccess] = useState(false);    
     const [loading, setLoading] = useState(false);
+    const currentUserId = localStorage.getItem('userId');
 
     useEffect(() => {
-        // Retrieve userId from localStorage (make sure this exists and is correct)
-        const userId = localStorage.getItem('userId');
         const pageId = 1; // The page ID for the Profile
-        fetchPages(); // Refresh the list upon loading
-        // If userId is missing, deny access early
-        if (!userId) {
+        if (!currentUserId) {
             setHasAccess(false);
             return;
         }
 
-        // Function to check if the user has access
         const checkAccess = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/page_access/${userId}/${pageId}`);
-                
-                // Check if the API response contains the 'hasAccess' field
+                const response = await axios.get(`http://localhost:5000/api/page_access/${currentUserId}/${pageId}`);
                 if (response.data && typeof response.data.hasAccess === 'boolean') {
                     setHasAccess(response.data.hasAccess);
                 } else {
@@ -35,24 +29,23 @@ const UserPageAccess = () => {
                 }
             } catch (error) {
                 console.error('Error checking access:', error);
-                setHasAccess(false); // No access if there's an error
+                setHasAccess(false);
             }
         };
 
         checkAccess();
-    }, []);
+    }, [currentUserId]);
 
     const handleSearchUser = async (e) => {
         e.preventDefault();
         if (!userId) return;
 
-        
         setLoading(true);
         try {
             const userResponse = await axios.get(`http://localhost:5000/api/users/${userId}`);
             if (userResponse.data) {
                 setUserFound(userResponse.data);
-                fetchPages();
+                fetchPages(userId);
             } else {
                 setUserFound(null);
                 alert('User not found');
@@ -63,20 +56,17 @@ const UserPageAccess = () => {
         setLoading(false);
     };
 
-    const fetchPages = async () => {
+    const fetchPages = async (targetUserId) => {
         try {
             const pageResponse = await axios.get('http://localhost:5000/api/pages');
             setPages(pageResponse.data);
-           
-            const accessResponse = await axios.get(`http://localhost:5000/api/page_access/${userId}`);
+
+            const accessResponse = await axios.get(`http://localhost:5000/api/page_access/${targetUserId}`);
             const accessData = accessResponse.data.reduce((acc, curr) => {
                 acc[curr.page_id] = String(curr.page_privilege) === '1';
-                
                 return acc;
             }, {});
-
             setPageAccess(accessData);
-           
         } catch (error) {
             console.error('Error fetching pages or access:', error);
         }
@@ -86,62 +76,42 @@ const UserPageAccess = () => {
         const updatedAccess = !hasAccess;
 
         try {
-            if (hasAccess === false) {
-                const existingAccessResponse = await axios.get(`http://localhost:5000/api/page_access/${userId}`);
-                const existingAccess = existingAccessResponse.data.find(access => access.page_id === pageId);
+            const existingAccessResponse = await axios.get(`http://localhost:5000/api/page_access/${userId}`);
+            const existingAccess = existingAccessResponse.data.find(access => access.page_id === pageId);
 
-                if (!existingAccess) {
-                    await axios.post('http://localhost:5000/api/page_access', {
-                        user_id: userId,
-                        page_id: pageId,
-                        page_privilege: updatedAccess ? '1' : '0',
-                    });
-                } else {
-                    await axios.put(`http://localhost:5000/api/page_access/${userId}/${pageId}`, {
-                        page_privilege: updatedAccess ? '1' : '0',
-                    });
-                }
-            } else {
-                await axios.put(`http://localhost:5000/api/page_access/${userId}/${pageId}`, {
-                    page_privilege: updatedAccess ? '1' : '0',
-                });
-            }
+            if (!existingAccess) {
+    await axios.post('http://localhost:5000/api/page_access', {
+  user_id: currentUserId, // 👈 the one doing the change
+  page_id: pageId,
+  page_privilege: updatedAccess ? '1' : '0',
+});
+
+} else {
+    await axios.put(`http://localhost:5000/api/page_access/${userId}/${pageId}`, {
+        page_privilege: updatedAccess ? '1' : '0',
+        user_id: currentUserId,
+    }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+}
+
+
             setPageAccess((prevAccess) => ({
                 ...prevAccess,
                 [pageId]: updatedAccess,
             }));
         } catch (error) {
-            if (error.response && error.response.status === 409) {
-                try {
-                    await axios.put(`http://localhost:5000/api/page_access/${userId}/${pageId}`, {
-                        page_privilege: updatedAccess ? '1' : '0',
-                    });
-                    setPageAccess((prevAccess) => ({
-                        ...prevAccess,
-                        [pageId]: updatedAccess,
-                    }));
-                } catch (updateError) {
-                    console.error('Error updating page access:', updateError);
-                }
-            } else {
-                console.error('Error updating page access:', error);
-            }
+            console.error('Error updating page access:', error);
         }
     };
 
-    // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- START
-
-    // If hasAccess is still null, show a loading state
     if (hasAccess === null) {
         return <div>Loading access information...</div>;
     }
-  
-    // Deny access if hasAccess is false
+
     if (!hasAccess) {
         return <div>You do not have access to this page. You need to ask permission to the administration.</div>;
     }
-  // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- END
-
 
     return (
         <Box p={4}>
