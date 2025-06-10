@@ -174,29 +174,41 @@ app.put('/api/page_access/:userId/:pageId', checkAdmin, (req, res) => {
 });
 
 // PAGE ACCESS  CRUD END -----------------------------------------------------------------------
-// ---------- MOVIES ----------
-app.get('/api/movies', (_, res) => {
-  db.query('SELECT * FROM movie', (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
+// ---------- MOVIE ----------
+
+app.get("/movies", (req, res) => {
+  db.query("SELECT * FROM movie", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 });
-app.post('/api/movies', (req, res) => {
-  db.query('INSERT INTO movie SET ?', req.body, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Insert error' });
-    res.status(201).json({ id: result.insertId });
-  });
+
+app.post("/movies", (req, res) => {
+  const { Title, Genre, Language, Release_date, Runtime_minutes, Festival_joined, Distributor, Director, Actors } = req.body;
+  db.query("INSERT INTO movie (Title, Genre, Language, Release_date, Runtime_minutes, Festival_joined, Distributor, Director, Actors) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [Title, Genre, Language, Release_date, Runtime_minutes, Festival_joined, Distributor, Director, Actors],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Movie added successfully!", MovieID: result.insertId });
+    }
+  );
 });
-app.put('/api/movies/:id', (req, res) => {
-  db.query('UPDATE movie SET ? WHERE MovieID = ?', [req.body, req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Update error' });
-    res.json({ message: 'Movie updated' });
-  });
+
+app.put("/movies/:id", (req, res) => {
+  const { Title, Genre, Language, Release_date, Runtime_minutes, Festival_joined, Distributor, Director, Actors } = req.body;
+  db.query("UPDATE movie SET Title=?, Genre=?, Language=?, Release_date=?, Runtime_minutes=?, Festival_joined=?, Distributor=?, Director=?, Actors=? WHERE MovieID=?",
+    [Title, Genre, Language, Release_date, Runtime_minutes, Festival_joined, Distributor, Director, Actors, req.params.id],
+    (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Movie updated successfully!" });
+    }
+  );
 });
-app.delete('/api/movies/:id', (req, res) => {
-  db.query('DELETE FROM movie WHERE MovieID = ?', [req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Delete error' });
-    res.sendStatus(204);
+
+app.delete("/movies/:id", (req, res) => {
+  db.query("DELETE FROM movie WHERE MovieID=?", [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Movie deleted successfully!" });
   });
 });
 
@@ -330,31 +342,89 @@ app.delete('/api/payments/:id', (req, res) => {
   });
 });
 
-// ---------- USERS ----------
-app.get('/api/users', (_, res) => {
-  db.query('SELECT id, username, email, role FROM users', (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
+//-----------------------------------------------------------------------------------------------------------------------
+
+// Read (Get All Users)
+app.get('/users', (req, res) => {
+  const query = 'SELECT * FROM users';
+  db.query(query, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).send(result);
+  });
+});
+
+// Create (Add New User)
+app.post('/users', async (req, res) => {
+  const { username, email, role, password} = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const query = `INSERT INTO users (username, email, role, password) VALUES (?, ?, ?, ?)`;
+  db.query(query, [username,email,role, hashedPassword], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).send({ message: 'User created', id: result.insertId });
+  });
+});
+
+// Update User
+app.put('/users/:id', (req, res) => {
+  const { username, email, role, password} = req.body;
+  const { id } = req.params;
+  const query = 'UPDATE users SET username = ?, email = ?, role = ?, password = ? WHERE id = ?';
+  db.query(query, [username, email, role, password, id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).send({ message: 'User updated' });
+  });
+});
+
+// Delete User
+app.delete('/users/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM users WHERE id = ?';
+  db.query(query, [id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).send({ message: 'User deleted' });
+  });
+});
+
+//-----------------------------------------------------------------------------------------------------------------------
+// ---------- TICKET ----------
+// API Routes for Tickets
+app.get("/tickets", (req, res) => {
+  db.query("SELECT * FROM ticket", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 });
-app.post('/api/users', (req, res) => {
-  db.query('INSERT INTO users SET ?', req.body, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Insert error' });
-    res.status(201).json({ id: result.insertId });
+
+app.post("/tickets", (req, res) => {
+  const { BookingID, SeatID, Ticket_Price } = req.body;
+  db.query("INSERT INTO ticket (BookingID, SeatID, Ticket_Price) VALUES (?, ?, ?)",
+    [BookingID, SeatID, Ticket_Price],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Ticket added successfully!", TicketID: result.insertId });
+    }
+  );
+});
+
+app.put("/tickets/:id", (req, res) => {
+  const { BookingID, SeatID, Ticket_Price } = req.body;
+  db.query("UPDATE ticket SET BookingID=?, SeatID=?, Ticket_Price=? WHERE TicketID=?",
+    [BookingID, SeatID, Ticket_Price, req.params.id],
+    (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Ticket updated successfully!" });
+    }
+  );
+});
+
+app.delete("/tickets/:id", (req, res) => {
+  db.query("DELETE FROM ticket WHERE TicketID=?", [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Ticket deleted successfully!" });
   });
 });
-app.put('/api/users/:id', (req, res) => {
-  db.query('UPDATE users SET ? WHERE id = ?', [req.body, req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Update error' });
-    res.json({ message: 'User updated' });
-  });
-});
-app.delete('/api/users/:id', (req, res) => {
-  db.query('DELETE FROM users WHERE id = ?', [req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Delete error' });
-    res.sendStatus(204);
-  });
-});
+// ---------- TICKET ----------
 
 // ---------- SEATS ----------
 app.get('/api/seats', (_, res) => {

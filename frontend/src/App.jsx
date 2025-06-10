@@ -7,6 +7,7 @@ import Login from "./components/Login";
 import PageCRUD from './components/PageCrud';
 import UserPageAccess from './components/UserPageAccess';
 import Searchpage from "./components/Searchpage";
+import Dashboard from "./components/Dashboard";
 
 import Movie1 from './components/movies/movie1';
 import Movie2 from './components/movies/Movie2';
@@ -59,6 +60,9 @@ function MainLayout() {
           <ListItem component={Link} to="/page-access">
             <ListItemText primary="UserPageAccess" />
           </ListItem>
+          <ListItem component={Link} to="/dashboard">
+            <ListItemText primary="Dashboard" />
+          </ListItem>
           <ListItem>
             <Button onClick={handleLogout} variant="contained" color="secondary" fullWidth>
               Logout
@@ -79,6 +83,7 @@ function MainLayout() {
           <Route path="/page-crud" element={<PageCRUD />} />
           <Route path="/page-access" element={<UserPageAccess />} />
           <Route path="/searchpage" element={<Searchpage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
 
           <Route path="/movie1" element={<Movie1 />} />
           <Route path="/movie2" element={<Movie2 />} />
