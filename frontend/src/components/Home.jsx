@@ -21,7 +21,7 @@ const Home = () => {
             <CardMedia
               component="img"
               height="180"
-              image={`/assets/movie${movie.MovieID}.jpg`} // assumes images are named like movie1.jpg
+              image={`/src/assets/movie${movie.MovieID}.jpg`} // assumes images are named like movie1.jpg
               alt={movie.Title}
             />
             <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -36,14 +36,16 @@ const Home = () => {
                   mb: 2
                 }}
               >
-                {movie.Title}
+                <span>{movie.Title.split(' ').slice(0, 2).join(' ')}</span>
+                <br />
+                <span>{movie.Title.split(' ').slice(2).join(' ')}</span>
               </Typography>
               <Button
                 variant="contained"
                 fullWidth
                 onClick={() => navigate(`/movie${movie.MovieID}`)}
               >
-                WATCH NOW
+                BOOK NOW
               </Button>
             </CardContent>
           </Card>

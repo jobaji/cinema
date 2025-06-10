@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const pageRoutes = require('./pageRoutes'); // Path for the Routes 
 const app = express();
-
+const router = express.Router();
 app.use(express.json());
 app.use(cors());
 app.use('/api', pageRoutes);
@@ -381,6 +381,26 @@ app.delete('/api/seats/:id', (req, res) => {
     res.sendStatus(204);
   });
 });
+
+app.get('/api/bookings/search', (req, res) => {
+  const bookingId = req.query.query;
+
+  const sql = `
+    SELECT b.*, c.Name AS CustomerName
+    FROM bookings b
+    LEFT JOIN customers c ON b.CustomerID = c.CustomerID
+    WHERE b.BookingID = ?;
+  `;
+
+  db.query(sql, [bookingId], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
 
 app.listen(5000, () => {
   console.log('Server running on port 5000');

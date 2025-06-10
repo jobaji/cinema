@@ -6,7 +6,9 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import PageCRUD from './components/PageCrud';
 import UserPageAccess from './components/UserPageAccess';
-import Movie1 from './components/movies/Movie1';
+import Searchpage from "./components/Searchpage";
+
+import Movie1 from './components/movies/movie1';
 import Movie2 from './components/movies/Movie2';
 import Movie3 from './components/movies/Movie3';
 import Movie4 from './components/movies/Movie4';
@@ -48,6 +50,9 @@ function MainLayout() {
           <ListItem component={Link} to="/home">
             <ListItemText primary="Home" />
           </ListItem>
+          <ListItem component={Link} to="/searchpage">
+            <ListItemText primary="Searchpage" />
+          </ListItem>
           <ListItem component={Link} to="/page-crud">
             <ListItemText primary="PageCrud" />
           </ListItem>
@@ -73,6 +78,7 @@ function MainLayout() {
           <Route path="/home" element={<Home />} />
           <Route path="/page-crud" element={<PageCRUD />} />
           <Route path="/page-access" element={<UserPageAccess />} />
+          <Route path="/searchpage" element={<Searchpage />} />
 
           <Route path="/movie1" element={<Movie1 />} />
           <Route path="/movie2" element={<Movie2 />} />
