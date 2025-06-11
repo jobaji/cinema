@@ -738,68 +738,6 @@ const printTickets = () => {
         </TableBody>
       </Table>
 
-      <h2>Tickets</h2>
-      <div>
-        <TextField label="Booking ID" value={newTicket.BookingID} onChange={(e) => setNewTicket({ ...newTicket, BookingID: e.target.value })} />
-        <TextField label="Seat ID" value={newTicket.SeatID} onChange={(e) => setNewTicket({ ...newTicket, SeatID: e.target.value })} />
-        <TextField label="Ticket Price" value={newTicket.Ticket_Price} onChange={(e) => setNewTicket({ ...newTicket, Ticket_Price: e.target.value })} />
-        <Button onClick={addTicket} variant="contained" color="primary">Add Ticket</Button>
-        <Button onClick={printTickets} variant="contained" color="secondary" style={{ marginLeft: '10px' }}>Print Tickets</Button>
-      </div>
-
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Ticket ID</TableCell>
-            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Booking ID</TableCell>
-            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Seat ID</TableCell>
-            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Ticket Price</TableCell>
-            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {tickets.map(ticket => (
-            <TableRow key={ticket.TicketID}>
-              <TableCell sx={{ border: '1px solid black' }}>{ticket.TicketID}</TableCell>
-              <TableCell sx={{ border: '1px solid black' }}>
-                {editTicket && editTicket.TicketID === ticket.TicketID ? (
-                  <TextField value={editTicket.BookingID} onChange={(e) => setEditTicket({ ...editTicket, BookingID: e.target.value })} />
-                ) : (
-                  ticket.BookingID
-                )}
-              </TableCell>
-              <TableCell sx={{ border: '1px solid black' }}>
-                {editTicket && editTicket.TicketID === ticket.TicketID ? (
-                  <TextField value={editTicket.SeatID} onChange={(e) => setEditTicket({ ...editTicket, SeatID: e.target.value })} />
-                ) : (
-                  ticket.SeatID
-                )}
-              </TableCell>
-              <TableCell sx={{ border: '1px solid black' }}>
-                {editTicket && editTicket.TicketID === ticket.TicketID ? (
-                  <TextField value={editTicket.Ticket_Price} onChange={(e) => setEditTicket({ ...editTicket, Ticket_Price: e.target.value })} />
-                ) : (
-                  ticket.Ticket_Price
-                )}
-              </TableCell>
-              <TableCell sx={{ border: '1px solid black' }}>
-                {editTicket && editTicket.TicketID === ticket.TicketID ? (
-                  <>
-                    <Button onClick={updateTicket} variant="contained" color="primary">Save</Button>
-                    <Button onClick={() => setEditTicket(null)} variant="outlined" color="secondary">Cancel</Button>
-                  </>
-                ) : (
-                  <>
-                    <Button onClick={() => setEditTicket(ticket)} variant="outlined" color="primary">Edit</Button>
-                    <Button onClick={() => deleteTicket(ticket.TicketID)} variant="outlined" color="secondary">Delete</Button>
-                  </>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
       <h2>Movie</h2>
       <div>
         <TextField label="Title" value={newMovie.Title} onChange={(e) => setNewMovie({ ...newMovie, Title: e.target.value })} />
@@ -915,6 +853,68 @@ const printTickets = () => {
             ))}
           </TableBody>
         </Table>
+
+      <h2>Tickets</h2>
+      <div>
+        <TextField label="Booking ID" value={newTicket.BookingID} onChange={(e) => setNewTicket({ ...newTicket, BookingID: e.target.value })} />
+        <TextField label="Seat ID" value={newTicket.SeatID} onChange={(e) => setNewTicket({ ...newTicket, SeatID: e.target.value })} />
+        <TextField label="Ticket Price" value={newTicket.Ticket_Price} onChange={(e) => setNewTicket({ ...newTicket, Ticket_Price: e.target.value })} />
+        <Button onClick={addTicket} variant="contained" color="primary">Add Ticket</Button>
+        <Button onClick={printTickets} variant="contained" color="secondary" style={{ marginLeft: '10px' }}>Print Tickets</Button>
+      </div>
+
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Ticket ID</TableCell>
+            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Booking ID</TableCell>
+            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Seat ID</TableCell>
+            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Ticket Price</TableCell>
+            <TableCell sx={{ border: '1px solid black', fontWeight: 'bold', backgroundColor: 'yellow' }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {tickets.map(ticket => (
+            <TableRow key={ticket.TicketID}>
+              <TableCell sx={{ border: '1px solid black' }}>{ticket.TicketID}</TableCell>
+              <TableCell sx={{ border: '1px solid black' }}>
+                {editTicket && editTicket.TicketID === ticket.TicketID ? (
+                  <TextField value={editTicket.BookingID} onChange={(e) => setEditTicket({ ...editTicket, BookingID: e.target.value })} />
+                ) : (
+                  ticket.BookingID
+                )}
+              </TableCell>
+              <TableCell sx={{ border: '1px solid black' }}>
+                {editTicket && editTicket.TicketID === ticket.TicketID ? (
+                  <TextField value={editTicket.SeatID} onChange={(e) => setEditTicket({ ...editTicket, SeatID: e.target.value })} />
+                ) : (
+                  ticket.SeatID
+                )}
+              </TableCell>
+              <TableCell sx={{ border: '1px solid black' }}>
+                {editTicket && editTicket.TicketID === ticket.TicketID ? (
+                  <TextField value={editTicket.Ticket_Price} onChange={(e) => setEditTicket({ ...editTicket, Ticket_Price: e.target.value })} />
+                ) : (
+                  ticket.Ticket_Price
+                )}
+              </TableCell>
+              <TableCell sx={{ border: '1px solid black' }}>
+                {editTicket && editTicket.TicketID === ticket.TicketID ? (
+                  <>
+                    <Button onClick={updateTicket} variant="contained" color="primary">Save</Button>
+                    <Button onClick={() => setEditTicket(null)} variant="outlined" color="secondary">Cancel</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={() => setEditTicket(ticket)} variant="outlined" color="primary">Edit</Button>
+                    <Button onClick={() => deleteTicket(ticket.TicketID)} variant="outlined" color="secondary">Delete</Button>
+                  </>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
           <h2>Theaters</h2>
             <div>
