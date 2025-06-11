@@ -27,7 +27,11 @@ const Dashboard = () => {
   const [newCustomer, setNewCustomer] = useState({ Name: "", Age: "", Gender: "", Email: "", Ticket_Purchase: "", Preferred_Movie_Genre: "", Membership: "" });
   const [editCustomer, setEditCustomer] = useState(null);
 
-  
+  const [bookings, setBookings] = useState([]);
+  const [newBooking, setNewBooking] = useState({ CustomerID: "", ShowtimeID: "", Booking_Quantity: "", Booking_Status: "" });
+  const [editBooking, setEditBooking] = useState(null);
+
+
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -52,6 +56,7 @@ const Dashboard = () => {
           fetchMovies();
           fetchTheaters();
           fetchCustomers();
+          fetchBookings();
 
 
         }
@@ -245,6 +250,36 @@ const Dashboard = () => {
 
  // CUSTOMER END ------------------------
 
+ // BOOKING START ------------------------
+    const fetchBookings = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/bookings");
+      setBookings(response.data);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
+
+  const addBooking = async () => {
+    if (!newBooking.CustomerID || !newBooking.ShowtimeID) return;
+    await axios.post("http://localhost:5000/bookings", newBooking);
+    setNewBooking({ CustomerID: "", ShowtimeID: "", Booking_Quantity: "", Booking_Status: "" });
+    fetchBookings();
+  };
+
+  const updateBooking = async () => {
+    if (!editBooking || !editBooking.BookingID) return;
+    await axios.put(`http://localhost:5000/bookings/${editBooking.BookingID}`, editBooking);
+    setEditBooking(null);
+    fetchBookings();
+  };
+
+  const deleteBooking = async (id) => {
+    await axios.delete(`http://localhost:5000/bookings/${id}`);
+    fetchBookings();
+  };
+
+ // BOOKING END ------------------------
 
  // CUSTOMER START ------------------------
   
@@ -496,10 +531,56 @@ const printTickets = () => {
 
       // PRINT CUSTOMER END ------------------------
 
+      // PRINT BOOKING START ------------------------
+        const printBookings = () => {
+        const printContent = `
+          <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer ID</th>
+                <th>Showtime ID</th>
+                <th>Quantity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${bookings.map(
+                (booking) => `
+              <tr>
+                <td>${booking.BookingID}</td>
+                <td>${booking.CustomerID}</td>
+                <td>${booking.ShowtimeID}</td>
+                <td>${booking.Booking_Quantity}</td>
+                <td>${booking.Booking_Status}</td>
+              </tr>
+            `
+              ).join("")}
+            </tbody>
+          </table>
+        `;
 
-      // PRINT CUSTOMER START ------------------------
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Print Bookings</title>
+            </head>
+            <body>
+              <h1>Bookings List</h1>
+              ${printContent}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      };
+      // PRINT BOOKING END ------------------------
 
-      // PRINT CUSTOMER END ------------------------
+      // PRINT BOOKING START ------------------------
+
+      
+      // PRINT BOOKING END ------------------------
 
 
      // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- START
@@ -933,21 +1014,165 @@ const printTickets = () => {
               {customers.map(customer => (
                 <TableRow key={customer.CustomerID}>
                   <TableCell sx={{ border: "1px solid black" }}>{customer.CustomerID}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Name}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Age}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Gender}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Email}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Ticket_Purchase}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Preferred_Movie_Genre}</TableCell>
-                  <TableCell sx={{ border: "1px solid black" }}>{customer.Membership}</TableCell>
                   <TableCell sx={{ border: "1px solid black" }}>
-                    <Button onClick={() => setEditCustomer(customer)} variant="outlined" color="primary">Edit</Button>
-                    <Button onClick={() => deleteCustomer(customer.CustomerID)} variant="outlined" color="secondary">Delete</Button>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <TextField value={editCustomer.Name} onChange={(e) => setEditCustomer({ ...editCustomer, Name: e.target.value })} />
+                    ) : (
+                      customer.Name
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <TextField type="number" value={editCustomer.Age} onChange={(e) => setEditCustomer({ ...editCustomer, Age: e.target.value })} />
+                    ) : (
+                      customer.Age
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <Select value={editCustomer.Gender} onChange={(e) => setEditCustomer({ ...editCustomer, Gender: e.target.value })}>
+                        <MenuItem value="Male">Male</MenuItem>
+                        <MenuItem value="Female">Female</MenuItem>
+                        <MenuItem value="Other">Other</MenuItem>
+                      </Select>
+                    ) : (
+                      customer.Gender
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <TextField value={editCustomer.Email} onChange={(e) => setEditCustomer({ ...editCustomer, Email: e.target.value })} />
+                    ) : (
+                      customer.Email
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <TextField type="number" value={editCustomer.Ticket_Purchase} onChange={(e) => setEditCustomer({ ...editCustomer, Ticket_Purchase: e.target.value })} />
+                    ) : (
+                      customer.Ticket_Purchase
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <TextField value={editCustomer.Preferred_Movie_Genre} onChange={(e) => setEditCustomer({ ...editCustomer, Preferred_Movie_Genre: e.target.value })} />
+                    ) : (
+                      customer.Preferred_Movie_Genre
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <TextField value={editCustomer.Membership} onChange={(e) => setEditCustomer({ ...editCustomer, Membership: e.target.value })} />
+                    ) : (
+                      customer.Membership
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    {editCustomer && editCustomer.CustomerID === customer.CustomerID ? (
+                      <>
+                        <Button onClick={updateCustomer} variant="contained" color="primary">Save</Button>
+                        <Button onClick={() => setEditCustomer(null)} variant="outlined" color="secondary">Cancel</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button onClick={() => setEditCustomer(customer)} variant="outlined" color="primary">Edit</Button>
+                        <Button onClick={() => deleteCustomer(customer.CustomerID)} variant="outlined" color="secondary">Delete</Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        <h2>Bookings</h2>
+      <div>
+        <TextField label="Customer ID" value={newBooking.CustomerID} onChange={(e) => setNewBooking({ ...newBooking, CustomerID: e.target.value })} />
+        <TextField label="Showtime ID" value={newBooking.ShowtimeID} onChange={(e) => setNewBooking({ ...newBooking, ShowtimeID: e.target.value })} />
+        <TextField label="Booking Quantity" type="number" value={newBooking.Booking_Quantity} onChange={(e) => setNewBooking({ ...newBooking, Booking_Quantity: e.target.value })} />
+        <InputLabel>Status</InputLabel>
+        <Select value={newBooking.Booking_Status} onChange={(e) => setNewBooking({ ...newBooking, Booking_Status: e.target.value })}>
+          <MenuItem value="Confirmed">Confirmed</MenuItem>
+          <MenuItem value="Pending">Pending</MenuItem>
+          <MenuItem value="Cancelled">Cancelled</MenuItem>
+        </Select>
+        <Button onClick={addBooking} variant="contained" color="primary">Add Booking</Button>
+        <Button onClick={printBookings} variant="contained" color="secondary">Print Bookings</Button>
+      </div>
+
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>ID</TableCell>
+            <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Customer ID</TableCell>
+            <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Showtime ID</TableCell>
+            <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Quantity</TableCell>
+            <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Status</TableCell>
+            <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {bookings.map(booking => (
+            <TableRow key={booking.BookingID}>
+              <TableCell sx={{ border: "1px solid black" }}>{booking.BookingID}</TableCell>
+              <TableCell sx={{ border: "1px solid black" }}>
+                {editBooking && editBooking.BookingID === booking.BookingID ? (
+                  <TextField value={editBooking.CustomerID} onChange={(e) => setEditBooking({ ...editBooking, CustomerID: e.target.value })} />
+                ) : (
+                  booking.CustomerID
+                )}
+              </TableCell>
+
+              <TableCell sx={{ border: "1px solid black" }}>
+                {editBooking && editBooking.BookingID === booking.BookingID ? (
+                  <TextField value={editBooking.ShowtimeID} onChange={(e) => setEditBooking({ ...editBooking, ShowtimeID: e.target.value })} />
+                ) : (
+                  booking.ShowtimeID
+                )}
+              </TableCell>
+
+              <TableCell sx={{ border: "1px solid black" }}>
+                {editBooking && editBooking.BookingID === booking.BookingID ? (
+                  <TextField type="number" value={editBooking.Booking_Quantity} onChange={(e) => setEditBooking({ ...editBooking, Booking_Quantity: e.target.value })} />
+                ) : (
+                  booking.Booking_Quantity
+                )}
+              </TableCell>
+
+              <TableCell sx={{ border: "1px solid black" }}>
+                {editBooking && editBooking.BookingID === booking.BookingID ? (
+                  <Select value={editBooking.Booking_Status} onChange={(e) => setEditBooking({ ...editBooking, Booking_Status: e.target.value })}>
+                    <MenuItem value="Confirmed">Confirmed</MenuItem>
+                    <MenuItem value="Pending">Pending</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
+                  </Select>
+                ) : (
+                  booking.Booking_Status
+                )}
+              </TableCell>
+
+              <TableCell sx={{ border: "1px solid black" }}>
+                {editBooking && editBooking.BookingID === booking.BookingID ? (
+                  <>
+                    <Button onClick={updateBooking} variant="contained" color="primary">Save</Button>
+                    <Button onClick={() => setEditBooking(null)} variant="outlined" color="secondary">Cancel</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={() => setEditBooking(booking)} variant="outlined" color="primary">Edit</Button>
+                    <Button onClick={() => deleteBooking(booking.BookingID)} variant="outlined" color="secondary">Delete</Button>
+                  </>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
     </Container>
    );

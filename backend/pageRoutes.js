@@ -27,7 +27,7 @@ router.post('/pages', (req, res) => {
 
 
 // Read all pages
-router.get('/pages', (_req, res) => {
+router.get('/pages', (req, res) => {
     db.query('SELECT * FROM page_table', (err, results) => {
         if (err) return res.status(500).json(err);
         res.status(200).json(results);
