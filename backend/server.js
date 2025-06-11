@@ -53,7 +53,7 @@ app.post('/login', (req, res) => {
 
 // Middleware to check if the user is an admin
 function checkAdmin(req, res, next) {
-  const userId = req.body.user_id || req.params.userId;
+const userId = req.headers['x-acting-user-id'] || req.body.user_id || req.params.userId;
   console.log(`Checking admin access for User ID: ${userId}`); // Log for debugging
   const query = 'SELECT role FROM users WHERE id = ?';
   

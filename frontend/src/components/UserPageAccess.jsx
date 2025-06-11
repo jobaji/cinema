@@ -81,21 +81,28 @@ const UserPageAccess = () => {
 
             if (!existingAccess) {
     await axios.post('http://localhost:5000/api/page_access', {
-  user_id: currentUserId, // 👈 the one doing the change
-  page_id: pageId,
-  page_privilege: updatedAccess ? '1' : '0',
-});
-
-} else {
-    await axios.put(`http://localhost:5000/api/page_access/${userId}/${pageId}`, {
+        user_id: userId, // this is the target user
+        page_id: pageId,
         page_privilege: updatedAccess ? '1' : '0',
-        user_id: currentUserId,
-    }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-}
+        }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'x-acting-user-id': currentUserId  // 👈 Pass the acting admin
+        }
+        });
 
 
+
+            } else {
+            await axios.put(`http://localhost:5000/api/page_access/${userId}/${pageId}`, {
+        page_privilege: updatedAccess ? '1' : '0',
+        }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'x-acting-user-id': currentUserId  // 👈 acting admin ID
+        }
+        });
+        }
             setPageAccess((prevAccess) => ({
                 ...prevAccess,
                 [pageId]: updatedAccess,
