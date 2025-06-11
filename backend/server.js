@@ -187,7 +187,6 @@ app.get("/api/movies", (req, res) => {
   });
 });
 
-// ✅ This matches /api/movies/1
 app.get("/api/movies/:id", (req, res) => {
   const movieId = req.params.id;
 

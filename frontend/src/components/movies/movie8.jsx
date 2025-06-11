@@ -11,7 +11,7 @@ const Movie8 = () => {
       .catch(error => console.error('Error fetching movie:', error));
   }, []);
 
-  // **Fix: Check if movie is null before rendering**
+
   if (!movie) {
     return <Typography variant="h6">Loading movie details...</Typography>;
   }
@@ -22,7 +22,7 @@ const Movie8 = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight: '100vh', // full vertical height
+        minHeight: '100vh', 
         backgroundColor: '#f5f5f5',
         p: 2,
       }}
@@ -30,7 +30,7 @@ const Movie8 = () => {
       <Card sx={{ width: 500 }}>
         <CardMedia
             component="img"
-            sx={{ width: '100%', height: 'auto' }} // ✅ Makes the image responsive
+            sx={{ width: '100%', height: 'auto' }} 
             image={`/src/assets/movie${movie.MovieID}.jpg`}
             alt={movie.Title}
           />

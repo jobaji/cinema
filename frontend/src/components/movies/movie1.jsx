@@ -3,7 +3,7 @@ import { Typography, Box, Card, CardMedia, CardContent } from '@mui/material';
 import axios from 'axios';
 
 const Movie1 = () => {
-  const [movie, setMovie] = useState(null); // Fixed `setMovies` typo to `setMovie`
+  const [movie, setMovie] = useState(null);
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/movies/1')
@@ -11,7 +11,6 @@ const Movie1 = () => {
       .catch(error => console.error('Error fetching movie:', error));
   }, []);
 
-  // **Fix: Check if movie is null before rendering**
   if (!movie) {
     return <Typography variant="h6">Loading movie details...</Typography>;
   }
@@ -22,7 +21,7 @@ const Movie1 = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight: '100vh', // full vertical height
+        minHeight: '100vh',
         backgroundColor: '#f5f5f5',
         p: 2,
       }}
@@ -30,7 +29,7 @@ const Movie1 = () => {
       <Card sx={{ width: 500 }}>
         <CardMedia
           component="img"
-          sx={{ width: '100%', height: 'auto' }} // ✅ Makes the image responsive
+          sx={{ width: '100%', height: 'auto' }}
           image={`/src/assets/movie${movie.MovieID}.jpg`}
           alt={movie.Title}
         />

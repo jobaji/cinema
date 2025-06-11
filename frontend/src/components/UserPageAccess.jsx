@@ -81,7 +81,7 @@ const UserPageAccess = () => {
 
             if (!existingAccess) {
     await axios.post('http://localhost:5000/api/page_access', {
-        user_id: userId, // this is the target user
+        user_id: userId, 
         page_id: pageId,
         page_privilege: updatedAccess ? '1' : '0',
         }, {
@@ -99,7 +99,7 @@ const UserPageAccess = () => {
         }, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'x-acting-user-id': currentUserId  // 👈 acting admin ID
+            'x-acting-user-id': currentUserId
         }
         });
         }

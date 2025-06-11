@@ -637,7 +637,6 @@ const printTickets = () => {
           onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
           <Button onClick={addUser} variant="contained" color="primary">Add</Button>
-          {/* Print Users Button */}
         <Button
           onClick={printUsers}
           variant="contained"
