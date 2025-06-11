@@ -9,7 +9,7 @@ import UserPageAccess from './components/UserPageAccess';
 import Searchpage from "./components/Searchpage";
 import Dashboard from "./components/Dashboard";
 
-import Movie1 from './components/movies/movie1';
+import Movie1 from './components/movies/Movie1';
 import Movie2 from './components/movies/Movie2';
 import Movie3 from './components/movies/Movie3';
 import Movie4 from './components/movies/Movie4';

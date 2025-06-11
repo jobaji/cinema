@@ -176,12 +176,31 @@ app.put('/api/page_access/:userId/:pageId', checkAdmin, (req, res) => {
 // PAGE ACCESS  CRUD END -----------------------------------------------------------------------
 // ---------- MOVIE ----------
 
-app.get("/movies", (req, res) => {
+app.get("/api/movies", (req, res) => {
   db.query("SELECT * FROM movie", (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 });
+
+// ✅ This matches /api/movies/1
+app.get("/api/movies/:id", (req, res) => {
+  const movieId = req.params.id;
+
+  db.query("SELECT * FROM movie WHERE MovieID = ?", [movieId], (err, results) => {
+    if (err) {
+      console.error("Error fetching movie by ID:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Movie not found" });
+    }
+
+    res.json(results[0]);
+  });
+});
+
 
 app.post("/movies", (req, res) => {
   const { Title, Genre, Language, Release_date, Runtime_minutes, Festival_joined, Distributor, Director, Actors } = req.body;
