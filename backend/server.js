@@ -6,6 +6,10 @@ const bcrypt = require('bcryptjs');
 const pageRoutes = require('./pageRoutes'); // Path for the Routes 
 const app = express();
 const router = express.Router();
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 app.use(express.json());
 app.use(cors());
 app.use('/api', pageRoutes);
@@ -258,30 +262,45 @@ app.delete('/api/bookings/:id', (req, res) => {
 });
 
 // ---------- CUSTOMERS ----------
-app.get('/api/customers', (_, res) => {
-  db.query('SELECT * FROM customer', (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
+// API Routes for Customers
+app.get("/customers", (req, res) => {
+  db.query("SELECT * FROM customer", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 });
-app.post('/api/customers', (req, res) => {
-  db.query('INSERT INTO customer SET ?', req.body, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Insert error' });
-    res.status(201).json({ id: result.insertId });
+
+app.post("/customers", (req, res) => {
+  const { Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership } = req.body;
+  db.query(
+    "INSERT INTO customer (Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Customer added successfully!", CustomerID: result.insertId });
+    }
+  );
+});
+
+app.put("/customers/:id", (req, res) => {
+  const { Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership } = req.body;
+  db.query(
+    "UPDATE customer SET Name=?, Age=?, Gender=?, Email=?, Ticket_Purchase=?, Preferred_Movie_Genre=?, Membership=? WHERE CustomerID=?",
+    [Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership, req.params.id],
+    (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Customer updated successfully!" });
+    }
+  );
+});
+
+app.delete("/customers/:id", (req, res) => {
+  db.query("DELETE FROM customer WHERE CustomerID=?", [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Customer deleted successfully!" });
   });
 });
-app.put('/api/customers/:id', (req, res) => {
-  db.query('UPDATE customer SET ? WHERE CustomerID = ?', [req.body, req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Update error' });
-    res.json({ message: 'Customer updated' });
-  });
-});
-app.delete('/api/customers/:id', (req, res) => {
-  db.query('DELETE FROM customer WHERE CustomerID = ?', [req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Delete error' });
-    res.sendStatus(204);
-  });
-});
+
 
 // ---------- MEMBERSHIPS ----------
 app.get('/api/memberships', (_, res) => {
@@ -444,6 +463,45 @@ app.delete("/tickets/:id", (req, res) => {
   });
 });
 // ---------- TICKET ----------
+
+// ---------- THEATERS ----------
+// API Routes for Theaters
+app.get("/theaters", (req, res) => {
+  db.query("SELECT * FROM theaters", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
+app.post("/theaters", (req, res) => {
+  const { TheaterName, Location, Capacity } = req.body;
+  db.query("INSERT INTO theaters (TheaterName, Location, Capacity) VALUES (?, ?, ?)",
+    [TheaterName, Location, Capacity],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Theater added successfully!", TheaterID: result.insertId });
+    }
+  );
+});
+
+app.put("/theaters/:id", (req, res) => {
+  const { TheaterName, Location, Capacity } = req.body;
+  db.query("UPDATE theaters SET TheaterName=?, Location=?, Capacity=? WHERE TheaterID=?",
+    [TheaterName, Location, Capacity, req.params.id],
+    (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Theater updated successfully!" });
+    }
+  );
+});
+
+app.delete("/theaters/:id", (req, res) => {
+  db.query("DELETE FROM theaters WHERE TheaterID=?", [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Theater deleted successfully!" });
+  });
+});
+// ---------- THEATERS ----------
 
 // ---------- SEATS ----------
 app.get('/api/seats', (_, res) => {

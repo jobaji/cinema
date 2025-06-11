@@ -1,34 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
-import { Box, Button, TextField, Typography, Card, CardContent, CardActions, Grid} from '@mui/material';
-
+import { useNavigate } from 'react-router-dom';
+import { Box, Button, TextField, Typography, Card, CardContent, CardActions, Grid, Paper } from '@mui/material';
 
 const PageCRUD = () => {
     const [pages, setPages] = useState([]);
     const [currentPageId, setCurrentPageId] = useState(null);
     const [pageDescription, setPageDescription] = useState('');
     const [pageGroup, setPageGroup] = useState('');
-    const [hasAccess, setHasAccess] = useState(false);    
-    const navigate = useNavigate(); // Initialize navigate
+    const [hasAccess, setHasAccess] = useState(false);
+    const navigate = useNavigate(); 
 
     useEffect(() => {
-        // Retrieve userId from localStorage (make sure this exists and is correct)
         const userId = localStorage.getItem('userId');
-        const pageId = 1; // The page ID for the Profile
-        fetchPages(); // Refresh the list upon loading
-        // If userId is missing, deny access early
+        const pageId = 1; 
+
+        fetchPages();
+
         if (!userId) {
             setHasAccess(false);
             return;
         }
 
-        // Function to check if the user has access
         const checkAccess = async () => {
             try {
                 const response = await axios.get(`http://localhost:5000/api/page_access/${userId}/${pageId}`);
-                
-                // Check if the API response contains the 'hasAccess' field
                 if (response.data && typeof response.data.hasAccess === 'boolean') {
                     setHasAccess(response.data.hasAccess);
                 } else {
@@ -37,16 +33,13 @@ const PageCRUD = () => {
                 }
             } catch (error) {
                 console.error('Error checking access:', error);
-                setHasAccess(false); // No access if there's an error
+                setHasAccess(false);
             }
         };
 
         checkAccess();
     }, []);
 
-
-
-    // Function to fetch all pages from the server
     const fetchPages = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/pages');
@@ -56,92 +49,104 @@ const PageCRUD = () => {
         }
     };
 
-    // Handle form submission for creating or updating a page
     const handleSubmit = async (e) => {
         e.preventDefault();
         const pageData = { page_description: pageDescription, page_group: pageGroup };
 
         try {
             if (currentPageId) {
-                // Update existing page
                 await axios.put(`http://localhost:5000/api/pages/${currentPageId}`, pageData);
             } else {
-                // Create new page
                 await axios.post('http://localhost:5000/api/pages', pageData);
             }
-            fetchPages(); // Refresh the list of pages
-            resetForm(); // Reset the form after submission
+            fetchPages();
+            resetForm();
         } catch (error) {
             console.error('Error saving page:', error);
         }
     };
 
-    // Reset the form fields
     const resetForm = () => {
         setCurrentPageId(null);
         setPageDescription('');
         setPageGroup('');
     };
 
-    // Handle the edit action for a page
     const handleEdit = (page) => {
         setCurrentPageId(page.id);
         setPageDescription(page.page_description);
         setPageGroup(page.page_group);
     };
 
-    // Handle the delete action for a page
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/api/pages/${id}`);
-            fetchPages(); // Refresh the list of pages after deletion
+            fetchPages();
         } catch (error) {
             console.error('Error deleting page:', error);
         }
     };
 
+    const printPages = () => {
+        const printContent = `
+            <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Group</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${pages.map(page => `
+                        <tr>
+                            <td>${page.id}</td>
+                            <td>${page.page_description}</td>
+                            <td>${page.page_group}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
 
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Pages</title>
+                </head>
+                <body>
+                    <h1>Pages List</h1>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    };
 
-
-   // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- START
-
-    // If hasAccess is still null, show a loading state
     if (hasAccess === null) {
         return <div>Loading access information...</div>;
     }
-  
-    // Deny access if hasAccess is false
+
     if (!hasAccess) {
-        return <div>You do not have access to this page. You need to ask permission to the administration.</div>;
+        return <div>You do not have access to this page. You need to ask permission from the administration.</div>;
     }
-  // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- END
 
+    return (
+        <Box p={4}>
+            <Paper sx={{ padding: 3, marginBottom: 4, textAlign: 'center', backgroundColor: '#f5f5f5' }}>
+                <Typography variant="h4">Page Dashboard</Typography>
+                <Typography variant="h6">Total Pages: {pages.length}</Typography>
+                <Button onClick={printPages} variant="contained" color="secondary">Print Pages</Button>
+            </Paper>
 
-    return(
-     <Box>
-            <Typography variant="h4" gutterBottom>
-                Page CRUD
+            <Typography variant="h5" gutterBottom>
+                Manage Pages
             </Typography>
-            <Box
-                component="form"
-                onSubmit={handleSubmit}
-                sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}
-            >
-                <TextField
-                    label="Page Description"
-                    variant="outlined"
-                    sx={{width: '25ch'}}
-                    value={pageDescription}
-                    onChange={(e) => setPageDescription(e.target.value)}
-                />
-                <TextField
-                    label="Page Group"
-                    variant="outlined"
-                    sx={{width: '25ch'}}
-                    value={pageGroup}
-                    onChange={(e) => setPageGroup(e.target.value)}
-                    
-                />
+            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                <TextField label="Page Description" variant="outlined" sx={{ width: '25ch' }} value={pageDescription} onChange={(e) => setPageDescription(e.target.value)} />
+                <TextField label="Page Group" variant="outlined" sx={{ width: '25ch' }} value={pageGroup} onChange={(e) => setPageGroup(e.target.value)} />
                 <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button type="submit" variant="contained" color="primary">
                         {currentPageId ? 'Update' : 'Create'}
@@ -151,12 +156,13 @@ const PageCRUD = () => {
                     </Button>
                 </Box>
             </Box>
+
             <Typography variant="h5" gutterBottom>
                 Pages List
             </Typography>
             <Grid container spacing={2} paddingBottom={6}>
                 {pages.map((page) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={page.id} >
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={page.id}>
                         <Card variant="outlined">
                             <CardContent>
                                 <Typography variant="h6">{page.page_description}</Typography>
@@ -182,6 +188,5 @@ const PageCRUD = () => {
         </Box>
     );
 };
-
 
 export default PageCRUD;

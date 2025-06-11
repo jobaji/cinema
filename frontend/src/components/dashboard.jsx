@@ -19,6 +19,13 @@ const Dashboard = () => {
   const [newMovie, setNewMovie] = useState({ Title: "", Genre: "", Language: "", Release_date: "", Runtime_minutes: "", Festival_joined: "", Distributor: "", Director: "", Actors: "" });
   const [editMovie, setEditMovie] = useState(null);
 
+  const [theaters, setTheaters] = useState([]);
+  const [newTheater, setNewTheater] = useState({ TheaterName: "", Location: "", Capacity: "" });
+  const [editTheater, setEditTheater] = useState(null);
+
+  const [customers, setCustomers] = useState([]);
+  const [newCustomer, setNewCustomer] = useState({ Name: "", Age: "", Gender: "", Email: "", Ticket_Purchase: "", Preferred_Movie_Genre: "", Membership: "" });
+  const [editCustomer, setEditCustomer] = useState(null);
 
   
   const navigate = useNavigate();
@@ -43,6 +50,9 @@ const Dashboard = () => {
           fetchPages();
           fetchTickets();
           fetchMovies();
+          fetchTheaters();
+          fetchCustomers();
+
 
         }
       } else {
@@ -144,7 +154,7 @@ const Dashboard = () => {
 
   const fetchMovies = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/movies");
+      const response = await axios.get("http://localhost:5000/api/movies");
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching movies:", error);
@@ -171,6 +181,74 @@ const Dashboard = () => {
   };
 
  // Movie END ------------------------
+
+ // THEATERS START ------------------------
+    const fetchTheaters = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/theaters");
+      setTheaters(response.data);
+    } catch (error) {
+      console.error("Error fetching theaters:", error);
+    }
+  };
+
+  const addTheater = async () => {
+    if (!newTheater.TheaterName.trim()) return;
+    await axios.post("http://localhost:5000/theaters", newTheater);
+    setNewTheater({ TheaterName: "", Location: "", Capacity: "" });
+    fetchTheaters();
+  };
+
+  const updateTheater = async () => {
+    if (!editTheater || !editTheater.TheaterID) return;
+    await axios.put(`http://localhost:5000/theaters/${editTheater.TheaterID}`, editTheater);
+    setEditTheater(null);
+    fetchTheaters();
+  };
+
+  const deleteTheater = async (id) => {
+    await axios.delete(`http://localhost:5000/theaters/${id}`);
+    fetchTheaters();
+  };
+
+ // THEATERS END ------------------------
+
+ // CUSTOMER START ------------------------
+  const fetchCustomers = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/customers");
+      setCustomers(response.data);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  const addCustomer = async () => {
+    if (!newCustomer.Name.trim()) return;
+    await axios.post("http://localhost:5000/customers", newCustomer);
+    setNewCustomer({ Name: "", Age: "", Gender: "", Email: "", Ticket_Purchase: "", Preferred_Movie_Genre: "", Membership: "" });
+    fetchCustomers();
+  };
+
+  const updateCustomer = async () => {
+    if (!editCustomer || !editCustomer.CustomerID) return;
+    await axios.put(`http://localhost:5000/customers/${editCustomer.CustomerID}`, editCustomer);
+    setEditCustomer(null);
+    fetchCustomers();
+  };
+
+  const deleteCustomer = async (id) => {
+    await axios.delete(`http://localhost:5000/customers/${id}`);
+    fetchCustomers();
+  };
+
+
+ // CUSTOMER END ------------------------
+
+
+ // CUSTOMER START ------------------------
+  
+ // CUSTOMER END ------------------------
 
  // PRINT USER START ------------------------
   const printUsers = () => {
@@ -315,6 +393,114 @@ const printTickets = () => {
   printWindow.print();
 };
    // PRINT MOVIE END ------------------------
+
+    // PRINT THEATERS START ------------------------
+
+    const printTheaters = () => {
+    const printContent = `
+      <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Capacity</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${theaters
+            .map(
+              (theater) => `
+          <tr>
+            <td>${theater.TheaterID}</td>
+            <td>${theater.TheaterName}</td>
+            <td>${theater.Location}</td>
+            <td>${theater.Capacity}</td>
+          </tr>
+        `
+            )
+            .join("")}
+        </tbody>
+      </table>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Theaters</title>
+        </head>
+        <body>
+          <h1>Theater List</h1>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+      // PRINT THEATERS END ------------------------
+
+      // PRINT CUSTOMER START ------------------------
+        const printCustomers = () => {
+          const printContent = `
+            <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Age</th>
+                  <th>Gender</th>
+                  <th>Email</th>
+                  <th>Ticket Purchase</th>
+                  <th>Preferred Genre</th>
+                  <th>Membership</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${customers
+                  .map(
+                    (customer) => `
+                <tr>
+                  <td>${customer.CustomerID}</td>
+                  <td>${customer.Name}</td>
+                  <td>${customer.Age}</td>
+                  <td>${customer.Gender}</td>
+                  <td>${customer.Email}</td>
+                  <td>${customer.Ticket_Purchase}</td>
+                  <td>${customer.Preferred_Movie_Genre}</td>
+                  <td>${customer.Membership}</td>
+                </tr>
+              `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          `;
+
+          const printWindow = window.open("", "_blank");
+          printWindow.document.write(`
+            <html>
+              <head>
+                <title>Print Customers</title>
+              </head>
+              <body>
+                <h1>Customer List</h1>
+                ${printContent}
+              </body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.print();
+        };
+
+      // PRINT CUSTOMER END ------------------------
+
+
+      // PRINT CUSTOMER START ------------------------
+
+      // PRINT CUSTOMER END ------------------------
+
 
      // PAGE ACCESS SCRIPT ------------------------ LOWER PART --- START
 
@@ -648,6 +834,120 @@ const printTickets = () => {
             ))}
           </TableBody>
         </Table>
+
+          <h2>Theaters</h2>
+            <div>
+              <TextField label="Name" value={newTheater.TheaterName} onChange={(e) => setNewTheater({ ...newTheater, TheaterName: e.target.value })} />
+              <TextField label="Location" value={newTheater.Location} onChange={(e) => setNewTheater({ ...newTheater, Location: e.target.value })} />
+              <TextField label="Capacity" type="number" value={newTheater.Capacity} onChange={(e) => setNewTheater({ ...newTheater, Capacity: e.target.value })} />
+              <Button onClick={addTheater} variant="contained" color="primary">Add Theater</Button>
+              <Button onClick={printTheaters} variant="contained" color="secondary" style={{ marginLeft: "10px" }}>Print Theaters</Button>
+            </div>
+
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>ID</TableCell>
+                  <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Name</TableCell>
+                  <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Location</TableCell>
+                  <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Capacity</TableCell>
+                  <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {theaters.map(theater => (
+                  <TableRow key={theater.TheaterID}>
+                    <TableCell sx={{ border: "1px solid black" }}>{theater.TheaterID}</TableCell>
+                    <TableCell sx={{ border: "1px solid black" }}>
+                      {editTheater && editTheater.TheaterID === theater.TheaterID ? (
+                        <TextField value={editTheater.TheaterName} onChange={(e) => setEditTheater({ ...editTheater, TheaterName: e.target.value })} />
+                      ) : (
+                        theater.TheaterName
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ border: "1px solid black" }}>
+                      {editTheater && editTheater.TheaterID === theater.TheaterID ? (
+                        <TextField value={editTheater.Location} onChange={(e) => setEditTheater({ ...editTheater, Location: e.target.value })} />
+                      ) : (
+                        theater.Location
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ border: "1px solid black" }}>
+                      {editTheater && editTheater.TheaterID === theater.TheaterID ? (
+                        <TextField type="number" value={editTheater.Capacity} onChange={(e) => setEditTheater({ ...editTheater, Capacity: e.target.value })} />
+                      ) : (
+                        theater.Capacity
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ border: "1px solid black" }}>
+                      {editTheater && editTheater.TheaterID === theater.TheaterID ? (
+                        <>
+                          <Button onClick={updateTheater} variant="contained" color="primary">Save</Button>
+                          <Button onClick={() => setEditTheater(null)} variant="outlined" color="secondary">Cancel</Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button onClick={() => setEditTheater(theater)} variant="outlined" color="primary">Edit</Button>
+                          <Button onClick={() => deleteTheater(theater.TheaterID)} variant="outlined" color="secondary">Delete</Button>
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+        <h2>Customers</h2>
+          <div>
+            <TextField label="Name" value={newCustomer.Name} onChange={(e) => setNewCustomer({ ...newCustomer, Name: e.target.value })} />
+            <TextField label="Age" type="number" value={newCustomer.Age} onChange={(e) => setNewCustomer({ ...newCustomer, Age: e.target.value })} />
+            <InputLabel>Gender</InputLabel>
+            <Select value={newCustomer.Gender} onChange={(e) => setNewCustomer({ ...newCustomer, Gender: e.target.value })} label="Gender">
+              <MenuItem value="Male">Male</MenuItem>
+              <MenuItem value="Female">Female</MenuItem>
+              <MenuItem value="Other">Other</MenuItem>
+            </Select>
+            <TextField label="Email" value={newCustomer.Email} onChange={(e) => setNewCustomer({ ...newCustomer, Email: e.target.value })} />
+            <TextField label="Ticket Purchase" type="number" value={newCustomer.Ticket_Purchase} onChange={(e) => setNewCustomer({ ...newCustomer, Ticket_Purchase: e.target.value })} />
+            <TextField label="Preferred Genre" value={newCustomer.Preferred_Movie_Genre} onChange={(e) => setNewCustomer({ ...newCustomer, Preferred_Movie_Genre: e.target.value })} />
+            <TextField label="Membership" value={newCustomer.Membership} onChange={(e) => setNewCustomer({ ...newCustomer, Membership: e.target.value })} />
+            <Button onClick={addCustomer} variant="contained" color="primary">Add Customer</Button>
+            <Button onClick={printCustomers} variant="contained" color="secondary">Print Customers</Button>
+          </div>
+
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>ID</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Name</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Age</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Gender</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Email</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Ticket Purchase</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Preferred Genre</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Membership</TableCell>
+                <TableCell sx={{ border: "1px solid black", fontWeight: "bold", backgroundColor: "yellow" }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {customers.map(customer => (
+                <TableRow key={customer.CustomerID}>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.CustomerID}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Name}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Age}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Gender}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Email}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Ticket_Purchase}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Preferred_Movie_Genre}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>{customer.Membership}</TableCell>
+                  <TableCell sx={{ border: "1px solid black" }}>
+                    <Button onClick={() => setEditCustomer(customer)} variant="outlined" color="primary">Edit</Button>
+                    <Button onClick={() => deleteCustomer(customer.CustomerID)} variant="outlined" color="secondary">Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
     </Container>
    );
