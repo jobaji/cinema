@@ -12,7 +12,7 @@ const UserPageAccess = () => {
     const currentUserId = localStorage.getItem('userId');
 
     useEffect(() => {
-        const pageId = 1; // The page ID for the Profile
+        const pageId = 2; // The page ID for the Profile
         if (!currentUserId) {
             setHasAccess(false);
             return;

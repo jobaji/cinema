@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, MenuItem, Select, InputLabel } from '@mui/material';
+import { TextField, Button, Container, Typography, MenuItem, Select, InputLabel, Box } from '@mui/material';
 import { Link } from 'react-router-dom'; // Import Link
 
 const Register = () => {
@@ -18,8 +18,21 @@ const Register = () => {
     };
 
     return (
-        <div style={{width: "100vw",padding: '20px'}}>
         <Container>
+            <Box
+                sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'left',
+                justifyContent: 'center',
+                height: '70vh',
+                width: '60vh',
+                bgcolor: 'background.paper',
+                boxShadow: 3,
+                p: 3,
+                borderRadius: 2,
+                }}
+            >
             <Typography variant="h4" gutterBottom>
                 Register
             </Typography>
@@ -27,13 +40,13 @@ const Register = () => {
                 label="Username"
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 fullWidth
-                margin="dense"
+                margin="normal"
             />
             <TextField
                 label="Email"
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 fullWidth
-                margin="dense"
+                margin="normal"
             />
             <InputLabel>Role</InputLabel>
             <Select 
@@ -49,16 +62,27 @@ const Register = () => {
                 type="password"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 fullWidth
-                margin="dense"
+                margin="normal"
             />
-            <Button variant="contained" onClick={handleRegister}>
+            <Button 
+            type="submit"
+            fullWidth
+            sx={{
+              mt: 2,
+              py: 1,
+              background: 'linear-gradient(to right, #3f51b5, #9c27b0)',
+              color: '#fff',
+              fontWeight: 'bold',
+              '&:hover': { opacity: 0.9 },
+            }}
+            variant="contained" onClick={handleRegister}>
                 Register
             </Button>
             <Typography variant="body2" style={{ marginTop: '10px' }}>
                 Already have an account? <Link to="/">Login</Link>
             </Typography>
+            </Box>
         </Container>
-        </div>
     );
 };
 

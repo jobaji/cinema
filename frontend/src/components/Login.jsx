@@ -39,7 +39,7 @@ const Login = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100vh',
+          height: '60vh',
           bgcolor: 'background.paper',
           boxShadow: 3,
           p: 3,
@@ -67,11 +67,16 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           <Button
-            type="submit"
-            variant="contained"
-            color="primary"
+          type="submit"
             fullWidth
-            sx={{ mt: 2 }}
+            sx={{
+              mt: 2,
+              py: 1,
+              background: 'linear-gradient(to right, #3f51b5, #9c27b0)',
+              color: '#fff',
+              fontWeight: 'bold',
+              '&:hover': { opacity: 0.9 },
+            }}
           >
             Login
           </Button>
