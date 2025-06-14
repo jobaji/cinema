@@ -439,29 +439,39 @@ app.delete("/theaters/:id", (req, res) => {
 // ---------- THEATERS ----------
 
 // ---------- MEMBERSHIPS ----------
-app.get('/api/memberships', (_, res) => {
-  db.query('SELECT * FROM memberships', (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
-    res.json(results);
-  });
-});
-app.post('/api/memberships', (req, res) => {
-  db.query('INSERT INTO memberships SET ?', req.body, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Insert error' });
-    res.status(201).json({ id: result.insertId });
-  });
-});
-app.put('/api/memberships/:id', (req, res) => {
-  db.query('UPDATE memberships SET ? WHERE MembershipID = ?', [req.body, req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Update error' });
-    res.json({ message: 'Membership updated' });
-  });
-});
-app.delete('/api/memberships/:id', (req, res) => {
-  db.query('DELETE FROM memberships WHERE MembershipID = ?', [req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Delete error' });
-    res.sendStatus(204);
-  });
+app.post("/register-with-membership", async (req, res) => {
+  const { name, age, gender, email, preferredGenre, paymentMethod, amount } = req.body;
+
+  try {
+    const [customerResult] = await db.execute(
+      "INSERT INTO customer (Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [name, age, gender, email, 0, preferredGenre, "Active"]
+    );
+
+    const customerId = customerResult.insertId;
+
+    const startDate = new Date();
+    const expireDate = new Date();
+    expireDate.setFullYear(startDate.getFullYear() + 1); // 1 year validity
+
+    const [membershipResult] = await db.execute(
+      "INSERT INTO memberships (CustomerID, Membership, Start, Expire, Status) VALUES (?, ?, ?, ?, ?)",
+      [customerId, "Premium", startDate, expireDate, "Active"]
+    );
+
+    const membershipId = membershipResult.insertId;
+
+    await db.execute(
+      "INSERT INTO membership_payment (CustomerID, MembershipID, PaymentMethod, PaymentStatus, OR_Num, Amount) VALUES (?, ?, ?, ?, ?, ?)",
+      [customerId, membershipId, paymentMethod, "Completed", `OR${Date.now()}`, amount]
+    );
+
+    res.status(200).json({ message: "Customer registered with active membership." });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error during combined registration." });
+  }
 });
 
 // ---------- SHOWTIMES ----------
@@ -491,30 +501,37 @@ app.delete('/api/showtimes/:id', (req, res) => {
 });
 
 // ---------- PAYMENTS ----------
-app.get('/api/payments', (_, res) => {
-  db.query('SELECT * FROM payment', (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
-    res.json(results);
-  });
+// GET /api/payment/:bookingId → returns receipt info
+app.get('/api/payment/:bookingId', async (req, res) => {
+  const bookingId = req.params.bookingId;
+
+  try {
+    const [results] = await db.execute(
+      `SELECT 
+         p.BookingID,
+         p.PaymentMethod,
+         p.PaymentStatus,
+         p.OR_Num,
+         p.Total_Am,
+         t.Seat,
+         t.Showtime
+       FROM payment p
+       LEFT JOIN ticket t ON p.TicketID = t.TicketID
+       WHERE p.BookingID = ?`,
+      [bookingId]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'No receipt found.' });
+    }
+
+    res.json(results[0]);
+  } catch (err) {
+    console.error('❌ Error fetching receipt:', err);
+    res.status(500).json({ error: 'Server error fetching receipt.' });
+  }
 });
-app.post('/api/payments', (req, res) => {
-  db.query('INSERT INTO payment SET ?', req.body, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Insert error' });
-    res.status(201).json({ id: result.insertId });
-  });
-});
-app.put('/api/payments/:id', (req, res) => {
-  db.query('UPDATE payment SET ? WHERE PaymentID = ?', [req.body, req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Update error' });
-    res.json({ message: 'Payment updated' });
-  });
-});
-app.delete('/api/payments/:id', (req, res) => {
-  db.query('DELETE FROM payment WHERE PaymentID = ?', [req.params.id], err => {
-    if (err) return res.status(500).json({ error: 'Delete error' });
-    res.sendStatus(204);
-  });
-});
+
 // ---------- SEATS ----------
 app.get('/api/seats', (_, res) => {
   db.query('SELECT * FROM seat', (err, results) => {
@@ -541,17 +558,15 @@ app.delete('/api/seats/:id', (req, res) => {
   });
 });
 
-app.get('/api/bookings/search', (req, res) => {
-  const bookingId = req.query.query;
+app.get('/api/tickets/search', (req, res) => {
+  const ticketId = req.query.query;
 
   const sql = `
-    SELECT b.*, c.Name AS CustomerName
-    FROM bookings b
-    LEFT JOIN customers c ON b.CustomerID = c.CustomerID
-    WHERE b.BookingID = ?;
+    SELECT * FROM ticket
+    WHERE TicketID = ?;
   `;
 
-  db.query(sql, [bookingId], (err, results) => {
+  db.query(sql, [ticketId], (err, results) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({ error: 'Database error' });

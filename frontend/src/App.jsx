@@ -8,6 +8,11 @@ import PageCRUD from './components/PageCrud';
 import UserPageAccess from './components/UserPageAccess';
 import Searchpage from "./components/Searchpage";
 import Dashboard from "./components/Dashboard";
+import Payment from "./components/Payment";
+import Membership from "./components/Membership";
+import Receipt from "./components/Receipt";
+
+
 
 import Movie1 from './components/movies/Movie1';
 import Movie2 from './components/movies/Movie2';
@@ -51,6 +56,12 @@ function MainLayout() {
           <ListItem component={Link} to="/home">
             <ListItemText primary="Home" />
           </ListItem>
+          <ListItem component={Link} to="/membership">
+            <ListItemText primary="Membership" />
+          </ListItem>
+          <ListItem component={Link} to="/receipt">
+            <ListItemText primary="Receipt" />
+          </ListItem>
           <ListItem component={Link} to="/searchpage">
             <ListItemText primary="Searchpage" />
           </ListItem>
@@ -84,6 +95,10 @@ function MainLayout() {
           <Route path="/page-access" element={<UserPageAccess />} />
           <Route path="/searchpage" element={<Searchpage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/membership" element={<Membership />} />
+          <Route path="/receipt" element={<Receipt />} />
+
 
           <Route path="/movie1" element={<Movie1 />} />
           <Route path="/movie2" element={<Movie2 />} />

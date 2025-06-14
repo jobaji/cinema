@@ -12,27 +12,27 @@ import {
   Container
 } from '@mui/material';
 
-const Searchpage = () => {
-  const [bookingId, setBookingId] = useState('');
+const SearchTicket = () => {
+  const [ticketId, setTicketId] = useState('');
   const [results, setResults] = useState([]);
 
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/bookings/search?query=${bookingId}`);
+      const response = await axios.get(`http://localhost:5000/api/tickets/search?query=${ticketId}`);
       setResults(response.data);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
+      console.error('Error fetching tickets:', error);
     }
   };
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>Search Booking by Booking ID</Typography>
+      <Typography variant="h5" gutterBottom>Search Ticket by Ticket ID</Typography>
       <TextField
-        label="Booking ID"
+        label="Ticket ID"
         variant="outlined"
-        value={bookingId}
-        onChange={(e) => setBookingId(e.target.value)}
+        value={ticketId}
+        onChange={(e) => setTicketId(e.target.value)}
         sx={{ mr: 2, width: '300px' }}
       />
       <Button variant="contained" onClick={handleSearch}>Search</Button>
@@ -41,21 +41,19 @@ const Searchpage = () => {
         <Table sx={{ mt: 4 }}>
           <TableHead>
             <TableRow>
+              <TableCell>Ticket ID</TableCell>
               <TableCell>Booking ID</TableCell>
-              <TableCell>Customer Name</TableCell>
-              <TableCell>Showtime ID</TableCell>
-              <TableCell>Booking Quantity</TableCell>
-              <TableCell>Booking Status</TableCell>
+              <TableCell>Seat ID</TableCell>
+              <TableCell>Ticket Price</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {results.map((row) => (
-              <TableRow key={row.BookingID}>
+              <TableRow key={row.TicketID}>
+                <TableCell>{row.TicketID}</TableCell>
                 <TableCell>{row.BookingID}</TableCell>
-                <TableCell>{row.CustomerName}</TableCell>
-                <TableCell>{row.ShowtimeID}</TableCell>
-                <TableCell>{row.Booking_Quantity}</TableCell>
-                <TableCell>{row.Booking_Status}</TableCell>
+                <TableCell>{row.SeatID}</TableCell>
+                <TableCell>{row.Ticket_Price}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -65,4 +63,4 @@ const Searchpage = () => {
   );
 };
 
-export default Searchpage;
+export default SearchTicket;

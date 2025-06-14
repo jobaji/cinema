@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Box, Card, CardMedia, CardContent } from '@mui/material';
+import { Card, CardMedia, CardContent, Button, Typography, Box } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Movie9 = () => {
   const [movie, setMovie] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/movies/9')
@@ -16,24 +18,15 @@ const Movie9 = () => {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh', 
-        backgroundColor: '#f5f5f5',
-        p: 2,
-      }}
-    >
-      <Card sx={{ width: 500 }}>
+    <Card sx={{ maxWidth: 900 }}>
+      <Box sx={{ display: 'flex' }}>
         <CardMedia
-            component="img"
-            sx={{ width: '100%', height: 'auto' }} 
-            image={`/src/assets/movie${movie.MovieID}.jpg`}
-            alt={movie.Title}
-          />
-        <CardContent>
+          component="img"
+          sx={{ width: 300, height: 'auto' }}
+          image={`/src/assets/movie${movie.MovieID}.jpg`}
+          alt={movie.Title}
+        />
+        <CardContent sx={{ flex: 1 }}>
           <Typography variant="h4" gutterBottom>{movie.Title}</Typography>
           <Typography variant="body1" sx={{ mb: 2, fontStyle: 'italic' }}>
             Seven years after traveling worldwide, Woody lands in Japan, encountering Lynlyn, 
@@ -41,14 +34,20 @@ const Movie9 = () => {
           </Typography>
           <Typography variant="body2"><strong>Genre:</strong> {movie.Genre}</Typography>
           <Typography variant="body2"><strong>Released:</strong> {movie.Release_date}</Typography>
-          <Typography variant="body2"><strong>Genre:</strong> {movie.Genre}</Typography>
           <Typography variant="body2"><strong>Cast:</strong> {movie.Actors}</Typography>
           <Typography variant="body2"><strong>Duration:</strong> {movie.Runtime_minutes} min</Typography>
           <Typography variant="body2"><strong>Country:</strong> {movie.Distributor}</Typography>
           <Typography variant="body2"><strong>Production:</strong> {movie.Director}</Typography>
+          <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate(`/payment`)}
+              >
+                BOOK NOW
+              </Button>
         </CardContent>
-      </Card>
-    </Box>
+      </Box>
+    </Card>
   );
 };
 
