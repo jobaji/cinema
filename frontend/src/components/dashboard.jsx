@@ -57,8 +57,6 @@ const Dashboard = () => {
           fetchTheaters();
           fetchCustomers();
           fetchBookings();
-
-
         }
       } else {
         console.error('Unexpected API response format:', response.data);
@@ -331,44 +329,50 @@ const Dashboard = () => {
 
  // TICKET USER START ------------------------
 const printTickets = () => {
-    const printContent = `
-      <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
-        <thead>
-          <tr>
-            <th>Ticket ID</th>
-            <th>Booking ID</th>
-            <th>Seat ID</th>
-            <th>Ticket Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tickets.map(ticket => `
+  const totalPrice = tickets.reduce((sum, ticket) => sum + parseFloat(ticket.Ticket_Price || 0), 0);
+
+  const printContent = `
+    <h2>Ticket Report</h2>
+    <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+      <thead>
+        <tr style="background-color: #f0f0f0;">
+          <th>Ticket ID</th>
+          <th>Booking ID</th>
+          <th>Seat ID</th>
+          <th>Ticket Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tickets.map(ticket => `
           <tr>
             <td>${ticket.TicketID}</td>
             <td>${ticket.BookingID}</td>
             <td>${ticket.SeatID}</td>
-            <td>${ticket.Ticket_Price}</td>
+            <td>₱${parseFloat(ticket.Ticket_Price).toFixed(2)}</td>
           </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
+        `).join('')}
+        <tr style="font-weight: bold; background-color: #e8e8e8;">
+          <td colspan="3" style="text-align: right;">Total Price:</td>
+          <td>₱${totalPrice.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Tickets</title>
-        </head>
-        <body>
-          <h1>Tickets List</h1>
-          ${printContent}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-  };
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Tickets</title>
+      </head>
+      <body>
+        ${printContent}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+};
    // PRINT TICKET END ------------------------
 
    // PRINT MOVIE START ------------------------
