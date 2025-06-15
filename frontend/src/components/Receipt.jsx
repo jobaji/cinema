@@ -1,26 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Typography, Paper, Divider, List, ListItem, ListItemText, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Button
+} from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const Receipt = () => {
   const navigate = useNavigate();
-  const { bookingId } = useParams(); // assuming URL has /receipt/:bookingId
-
+  const { bookingId } = useParams();
   const [receipt, setReceipt] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  if (!bookingId) return;
-  axios.get(`http://localhost:5000/api/payment/${bookingId}`)
-    .then(response => setReceipt(response.data))
-    .catch(err => console.error('Error fetching receipt:', err));
-}, [bookingId]);
+    if (!bookingId) return;
+    axios
+      .get(`http://localhost:5000/api/payment/${bookingId}`)
+      .then((response) => {
+        setReceipt(response.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('❌ Error fetching receipt:', err);
+        setReceipt({ error: true });
+        setLoading(false);
+      });
+  }, [bookingId]);
 
-  if (!receipt) {
+  const handlePrint = () => {
+    window.print();
+  };
+
+  if (loading) {
     return (
       <Typography align="center" mt={5}>
         Loading your receipt...
+      </Typography>
+    );
+  }
+
+  if (!receipt || receipt.error) {
+    return (
+      <Typography align="center" mt={5} color="error">
+        Failed to load receipt. Please try again.
       </Typography>
     );
   }
@@ -43,11 +72,21 @@ const Receipt = () => {
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" gutterBottom><strong>Receipt Summary</strong></Typography>
           <Typography variant="body2">Booking ID: <strong>{receipt.BookingID}</strong></Typography>
-          <Typography variant="body2">Seat: <strong>{receipt.Seat}</strong></Typography>
-          <Typography variant="body2">Showtime: <strong>{new Date(receipt.Showtime).toLocaleString()}</strong></Typography>
-          <Typography variant="body2">Payment Method: <strong>{receipt.PaymentMethod}</strong></Typography>
-          <Typography variant="body2">OR Number: <strong>{receipt.OR_Num}</strong></Typography>
-          <Typography variant="body2">Payment Status: <strong>{receipt.PaymentStatus}</strong></Typography>
+          {receipt.Seat && <Typography variant="body2">Seat: <strong>{receipt.Seat}</strong></Typography>}
+          {receipt.Showtime && (
+            <Typography variant="body2">
+              Showtime: <strong>{new Date(receipt.Showtime).toLocaleString()}</strong>
+            </Typography>
+          )}
+          {receipt.PaymentMethod && (
+            <Typography variant="body2">Payment Method: <strong>{receipt.PaymentMethod}</strong></Typography>
+          )}
+          {receipt.OR_Num && (
+            <Typography variant="body2">OR Number: <strong>{receipt.OR_Num}</strong></Typography>
+          )}
+          {receipt.PaymentStatus && (
+            <Typography variant="body2">Payment Status: <strong>{receipt.PaymentStatus}</strong></Typography>
+          )}
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -63,14 +102,10 @@ const Receipt = () => {
           </List>
         </Box>
 
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ mt: 3 }}
-          onClick={() => navigate('/home')}
-        >
-          DONE
-        </Button>
+        <Box display="flex" gap={2} mt={3}>
+          <Button variant="outlined" fullWidth onClick={handlePrint}>Print</Button>
+          <Button variant="contained" fullWidth onClick={() => navigate('/home')}>Done</Button>
+        </Box>
       </Paper>
     </Box>
   );

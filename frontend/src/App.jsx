@@ -12,8 +12,6 @@ import Payment from "./components/Payment";
 import Membership from "./components/Membership";
 import Receipt from "./components/Receipt";
 
-
-
 import Movie1 from './components/movies/Movie1';
 import Movie2 from './components/movies/Movie2';
 import Movie3 from './components/movies/Movie3';
@@ -59,8 +57,8 @@ function MainLayout() {
           <ListItem component={Link} to="/membership">
             <ListItemText primary="Membership" />
           </ListItem>
-          <ListItem component={Link} to="/receipt">
-            <ListItemText primary="Receipt" />
+          <ListItem component={Link} to="/payment">
+            <ListItemText primary="Payment" />
           </ListItem>
           <ListItem component={Link} to="/searchpage">
             <ListItemText primary="Searchpage" />
@@ -97,8 +95,7 @@ function MainLayout() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/membership" element={<Membership />} />
-          <Route path="/receipt" element={<Receipt />} />
-
+          <Route path="/receipt/:bookingId" element={<Receipt />} />
 
           <Route path="/movie1" element={<Movie1 />} />
           <Route path="/movie2" element={<Movie2 />} />

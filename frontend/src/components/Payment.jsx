@@ -1,106 +1,91 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Paper,
-} from '@mui/material';
+import axios from 'axios';
+import { TextField, Button, Typography, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const Payment = () => {
-  const [paymentMethod, setPaymentMethod] = useState('');
-  const [orNum, setOrNum] = useState('');
-  const [bookingId, setBookingId] = useState('');
-  const [seat, setSeat] = useState('');
-  const [showtime, setShowtime] = useState('');
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    CustomerID: '',
+    ShowtimeID: '',
+    SeatID: '',
+    Booking_Quantity: 1
+  });
+
   const [message, setMessage] = useState('');
 
-  const handleSubmit = () => {
-    if (!paymentMethod || !orNum || !bookingId || !seat || !showtime) {
-      setMessage('Please fill in all fields.');
-      return;
+  const handleChange = (e) => {
+    setForm(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:5000/bookings/with-discount", form);
+
+      const { message, ticket_price, bookingId } = res.data;
+      const finalPrice = ticket_price !== undefined
+        ? ` Final Ticket Price: ₱${Number(ticket_price).toFixed(2)}`
+        : "";
+
+      setMessage(`${message}${finalPrice}`);
+
+      // ✅ Redirect to receipt page with bookingId
+      navigate(`/receipt/${res.data.bookingId}`);
+
+    } catch (err) {
+      setMessage("Booking failed.");
+      console.error(err);
     }
-
-    const newPayment = {
-      BookingID: bookingId,
-      Seat: seat,
-      Showtime: showtime,
-      PaymentMethod: paymentMethod,
-      PaymentStatus: 'Pending',
-      OR_Num: orNum,
-    };
-
-    console.log('Submitting payment:', newPayment);
-    setMessage('Payment submitted successfully!');
   };
 
   return (
-    <Paper sx={{ maxWidth: 500, margin: 'auto', mt: 5, p: 3 }}>
-      <Typography variant="h5" gutterBottom>
-        Payment Details
-      </Typography>
-
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Payment Method</InputLabel>
-        <Select
-          value={paymentMethod}
-          label="Payment Method"
-          onChange={(e) => setPaymentMethod(e.target.value)}
-        >
-          <MenuItem value="G-Cash">G-Cash</MenuItem>
-          <MenuItem value="Paymaya">Paymaya</MenuItem>
-          <MenuItem value="Credit Card">Credit Card</MenuItem>
-        </Select>
-      </FormControl>
+    <Box sx={{ maxWidth: 400, mx: "auto", mt: 4 }}>
+      <Typography variant="h5" gutterBottom>Book a Ticket</Typography>
 
       <TextField
+        label="Customer ID"
+        name="CustomerID"
         fullWidth
-        label="Booking ID"
-        value={bookingId}
-        onChange={(e) => setBookingId(e.target.value)}
-        sx={{ mb: 2 }}
+        margin="normal"
+        value={form.CustomerID}
+        onChange={handleChange}
       />
-
       <TextField
+        label="Showtime ID"
+        name="ShowtimeID"
         fullWidth
-        label="Seat"
-        value={seat}
-        onChange={(e) => setSeat(e.target.value)}
-        sx={{ mb: 2 }}
+        margin="normal"
+        value={form.ShowtimeID}
+        onChange={handleChange}
       />
-
       <TextField
+        label="Seat ID"
+        name="SeatID"
         fullWidth
-        label="Showtime"
-        type="datetime-local"
-        value={showtime}
-        onChange={(e) => setShowtime(e.target.value)}
-        sx={{ mb: 2 }}
-        InputLabelProps={{ shrink: true }}
+        margin="normal"
+        value={form.SeatID}
+        onChange={handleChange}
       />
-
       <TextField
+        label="Quantity"
+        name="Booking_Quantity"
+        type="number"
         fullWidth
-        label="OR Number"
-        value={orNum}
-        onChange={(e) => setOrNum(e.target.value)}
-        sx={{ mb: 2 }}
+        margin="normal"
+        value={form.Booking_Quantity}
+        onChange={handleChange}
       />
 
-      <Button variant="contained" fullWidth onClick={handleSubmit}>
-        Submit Payment
+      <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
+        Book Now
       </Button>
 
-      {message && (
-        <Typography variant="body2" color="success.main" sx={{ mt: 2 }}>
-          {message}
-        </Typography>
-      )}
-    </Paper>
+      {message && <Typography sx={{ mt: 2 }}>{message}</Typography>}
+    </Box>
   );
 };
 

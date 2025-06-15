@@ -439,40 +439,55 @@ app.delete("/theaters/:id", (req, res) => {
 // ---------- THEATERS ----------
 
 // ---------- MEMBERSHIPS ----------
-app.post("/register-with-membership", async (req, res) => {
+app.post("/register-with-membership", (req, res) => {
   const { name, age, gender, email, preferredGenre, paymentMethod, amount } = req.body;
 
-  try {
-    const [customerResult] = await db.execute(
-      "INSERT INTO customer (Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [name, age, gender, email, 0, preferredGenre, "Active"]
-    );
+  console.log("🔍 Received:", req.body);
 
-    const customerId = customerResult.insertId;
+  const insertCustomer = `
+    INSERT INTO customer (Name, Age, Gender, Email, Ticket_Purchase, Preferred_Movie_Genre, Membership)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  db.query(insertCustomer, [name, age, gender, email, 0, preferredGenre, 'Active'], (err, result) => {
+    if (err) {
+      console.error("❌ Customer insert error:", err);
+      return res.status(500).json({ message: 'Customer insert failed', error: err });
+    }
 
-    const startDate = new Date();
-    const expireDate = new Date();
-    expireDate.setFullYear(startDate.getFullYear() + 1); // 1 year validity
+    const customerId = result.insertId;
+    console.log("✅ Customer created:", customerId);
 
-    const [membershipResult] = await db.execute(
-      "INSERT INTO memberships (CustomerID, Membership, Start, Expire, Status) VALUES (?, ?, ?, ?, ?)",
-      [customerId, "Premium", startDate, expireDate, "Active"]
-    );
+    const start = new Date();
+    const expire = new Date();
+    expire.setFullYear(start.getFullYear() + 1);
 
-    const membershipId = membershipResult.insertId;
+    const insertMembership = `
+      INSERT INTO memberships (CustomerID, Membership, Start, Expire, Status)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    db.query(insertMembership, [customerId, 'Premium', start, expire, 'Active'], (err, result2) => {
+      if (err) {
+        console.error("❌ Membership insert error:", err);
+        return res.status(500).json({ message: 'Membership insert failed', error: err });
+      }
 
-    await db.execute(
-      "INSERT INTO membership_payment (CustomerID, MembershipID, PaymentMethod, PaymentStatus, OR_Num, Amount) VALUES (?, ?, ?, ?, ?, ?)",
-      [customerId, membershipId, paymentMethod, "Completed", `OR${Date.now()}`, amount]
-    );
+      const insertPayment = `
+        INSERT INTO payment (BookingID, PaymentMethod, Total_Am, Purpose)
+        VALUES (?, ?, ?, ?)
+      `;
+      db.query(insertPayment, [null, paymentMethod, 'Completed', amount, 'Membership'], (err, result3) => {
+        if (err) {
+          console.error("❌ Payment insert error:", err);
+          return res.status(500).json({ message: 'Payment insert failed', error: err });
+        }
 
-    res.status(200).json({ message: "Customer registered with active membership." });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error during combined registration." });
-  }
+        console.log("✅ Membership and payment recorded.");
+        return res.status(200).json({ message: "Membership successfully registered." });
+      });
+    });
+  });
 });
+
 
 // ---------- SHOWTIMES ----------
 app.get('/api/showtimes', (_, res) => {
@@ -501,36 +516,42 @@ app.delete('/api/showtimes/:id', (req, res) => {
 });
 
 // ---------- PAYMENTS ----------
-// GET /api/payment/:bookingId → returns receipt info
-app.get('/api/payment/:bookingId', async (req, res) => {
-  const bookingId = req.params.bookingId;
+app.get('/api/payment/:bookingId', (req, res) => {
+  const { bookingId } = req.params;
 
-  try {
-    const [results] = await db.execute(
-      `SELECT 
-         p.BookingID,
-         p.PaymentMethod,
-         p.PaymentStatus,
-         p.OR_Num,
-         p.Total_Am,
-         t.Seat,
-         t.Showtime
-       FROM payment p
-       LEFT JOIN ticket t ON p.TicketID = t.TicketID
-       WHERE p.BookingID = ?`,
-      [bookingId]
-    );
+  const sql = `
+  SELECT 
+    p.BookingID,
+    t.SeatID AS Seat,
+    s.Start_Time AS Showtime,
+    p.PaymentMethod,
+    p.OR_Num,
+    'Completed' AS PaymentStatus
+  FROM payment p
+  JOIN ticket t ON t.BookingID = p.BookingID
+  JOIN booking b ON b.BookingID = p.BookingID
+  JOIN showtime s ON s.ShowtimeID = b.ShowtimeID
+  WHERE p.BookingID = ?
+  LIMIT 1;
+`;
 
-    if (results.length === 0) {
-      return res.status(404).json({ error: 'No receipt found.' });
+
+  db.query(sql, [bookingId], (err, result) => {
+    if (err) {
+      console.error("❌ Error fetching receipt:", err); // <= look for this in your terminal
+      return res.status(500).json({ error: 'Database query failed', detail: err });
     }
 
-    res.json(results[0]);
-  } catch (err) {
-    console.error('❌ Error fetching receipt:', err);
-    res.status(500).json({ error: 'Server error fetching receipt.' });
-  }
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Receipt not found' });
+    }
+
+    res.json(result[0]);
+  });
 });
+
+
+
 
 // ---------- SEATS ----------
 app.get('/api/seats', (_, res) => {
@@ -574,6 +595,68 @@ app.get('/api/tickets/search', (req, res) => {
     res.json(results);
   });
 });
+
+
+app.post("/bookings/with-discount", (req, res) => {
+  const { CustomerID, ShowtimeID, SeatID, Booking_Quantity } = req.body;
+  const basePrice = 350;
+
+  // Step 1: Check membership
+  db.query(
+    `SELECT * FROM memberships WHERE CustomerID = ? AND Status = 'Active' AND Expire >= CURDATE()`,
+    [CustomerID],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: "Membership check failed", error: err });
+
+      const isMember = results.length > 0;
+      const unitPrice = isMember ? basePrice * 0.9 : basePrice;
+      const totalAmount = unitPrice * Booking_Quantity;
+
+      // Step 2: Insert booking
+      db.query(
+        `INSERT INTO booking (CustomerID, ShowtimeID, Booking_Quantity, Booking_Status) VALUES (?, ?, ?, 'Confirmed')`,
+        [CustomerID, ShowtimeID, Booking_Quantity],
+        (err, bookingResult) => {
+          if (err) return res.status(500).json({ message: "Booking failed", error: err });
+
+          const bookingId = bookingResult.insertId;
+
+          // Step 3: Insert multiple tickets
+          const insertTickets = [];
+          for (let i = 0; i < Booking_Quantity; i++) {
+            insertTickets.push([bookingId, SeatID, unitPrice]);
+          }
+
+          db.query(
+            `INSERT INTO ticket (BookingID, SeatID, Ticket_Price) VALUES ?`,
+            [insertTickets],
+            (err) => {
+              if (err) return res.status(500).json({ message: "Ticket insert failed", error: err });
+
+              // Step 4: Insert payment
+              db.query(
+                `INSERT INTO payment (BookingID, PaymentMethod, Total_Am, OR_Num) VALUES (?, ?, ?, ?)`,
+                [bookingId, 'Cash', totalAmount, `OR${Date.now()}`],
+                (err) => {
+                  if (err) return res.status(500).json({ message: "Payment failed", error: err });
+
+                  res.status(200).json({
+                    message: `Booking successful. ${isMember ? '10% discount applied.' : 'Standard price.'}`,
+                    pricePerTicket: unitPrice.toFixed(2),
+                    total: totalAmount.toFixed(2),
+                    quantity: Booking_Quantity,
+                    bookingId: bookingId // ✅ final result
+                  });
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
 
 
 app.listen(5000, () => {
