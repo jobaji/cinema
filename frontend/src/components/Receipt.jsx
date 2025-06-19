@@ -70,24 +70,28 @@ const Receipt = () => {
         <Divider sx={{ my: 2 }} />
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" gutterBottom><strong>Receipt Summary</strong></Typography>
-          <Typography variant="body2">Booking ID: <strong>{receipt.BookingID}</strong></Typography>
-          {receipt.Seat && <Typography variant="body2">Seat: <strong>{receipt.Seat}</strong></Typography>}
-          {receipt.Showtime && (
-            <Typography variant="body2">
-              Showtime: <strong>{new Date(receipt.Showtime).toLocaleString()}</strong>
-            </Typography>
-          )}
-          {receipt.PaymentMethod && (
-            <Typography variant="body2">Payment Method: <strong>{receipt.PaymentMethod}</strong></Typography>
-          )}
-          {receipt.OR_Num && (
-            <Typography variant="body2">OR Number: <strong>{receipt.OR_Num}</strong></Typography>
-          )}
-          {receipt.PaymentStatus && (
-            <Typography variant="body2">Payment Status: <strong>{receipt.PaymentStatus}</strong></Typography>
-          )}
-        </Box>
+  <Typography variant="subtitle1" gutterBottom><strong>Receipt Summary</strong></Typography>
+  <Typography variant="body2">Booking ID: <strong>{receipt.BookingID}</strong></Typography>
+  <Typography variant="body2">Customer: <strong>{receipt.CustomerName}</strong></Typography>
+  {receipt.MembershipStatus && (
+    <Typography variant="body2">Membership: <strong>{receipt.MembershipStatus}</strong></Typography>
+  )}
+  {receipt.Seats && (
+    <Typography variant="body2">Seats: <strong>{receipt.Seats}</strong></Typography>
+  )}
+  {receipt.TicketQuantity && (
+    <Typography variant="body2">Quantity: <strong>{receipt.TicketQuantity}</strong></Typography>
+  )}
+  {receipt.Showtime && (
+    <Typography variant="body2">
+      Showtime: <strong>{new Date(receipt.Showtime).toLocaleString()}</strong>
+    </Typography>
+  )}
+  <Typography variant="body2">Amount Paid: <strong>₱{Number(receipt.AmountPaid).toFixed(2)}</strong></Typography>
+  <Typography variant="body2">Payment Method: <strong>{receipt.PaymentMethod}</strong></Typography>
+  <Typography variant="body2">OR Number: <strong>{receipt.OR_Num}</strong></Typography>
+  <Typography variant="body2">Payment Status: <strong>{receipt.PaymentStatus}</strong></Typography>
+</Box>
 
         <Divider sx={{ my: 2 }} />
 
